@@ -7,9 +7,22 @@ import { Mail, Lock, Rocket, ArrowRight } from "lucide-react";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState({});
+
+  const validate = () => {
+    const errs = {};
+    if (!email.trim()) errs.email = "Email is required.";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.email = "Enter a valid email address.";
+    if (!password) errs.password = "Password is required.";
+    else if (password.length < 6) errs.password = "Password must be at least 6 characters.";
+    return errs;
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const errs = validate();
+    if (Object.keys(errs).length > 0) { setErrors(errs); return; }
+    setErrors({});
     // No real auth — just redirect to dashboard
     window.location.href = "/dashboard";
   };
@@ -60,11 +73,12 @@ export default function LoginPage() {
                 type="email"
                 placeholder="you@college.edu"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => { setEmail(e.target.value); setErrors((p) => ({ ...p, email: "" })); }}
                 className="glass-input pl-11"
                 id="login-email"
               />
             </div>
+            {errors.email && <p className="text-[11px] mt-1" style={{ color: "#ef4444" }}>{errors.email}</p>}
           </div>
 
           <div>
@@ -81,11 +95,12 @@ export default function LoginPage() {
                 type="password"
                 placeholder="••••••••"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => { setPassword(e.target.value); setErrors((p) => ({ ...p, password: "" })); }}
                 className="glass-input pl-11"
                 id="login-password"
               />
             </div>
+            {errors.password && <p className="text-[11px] mt-1" style={{ color: "#ef4444" }}>{errors.password}</p>}
           </div>
 
           <button type="submit" className="btn-primary mt-2 w-full" id="login-submit">

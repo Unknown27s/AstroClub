@@ -14,6 +14,7 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [interests, setInterests] = useState([]);
+  const [errors, setErrors] = useState({});
 
   const toggleInterest = (interest) => {
     setInterests((prev) =>
@@ -21,8 +22,21 @@ export default function SignupPage() {
     );
   };
 
+  const validate = () => {
+    const errs = {};
+    if (!name.trim()) errs.name = "Full name is required.";
+    if (!email.trim()) errs.email = "Email is required.";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.email = "Enter a valid email address.";
+    if (!password) errs.password = "Password is required.";
+    else if (password.length < 6) errs.password = "Password must be at least 6 characters.";
+    return errs;
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    const errs = validate();
+    if (Object.keys(errs).length > 0) { setErrors(errs); return; }
+    setErrors({});
     window.location.href = "/dashboard";
   };
 
@@ -72,11 +86,12 @@ export default function SignupPage() {
                 type="text"
                 placeholder="Harish Kumar"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => { setName(e.target.value); setErrors((p) => ({ ...p, name: "" })); }}
                 className="glass-input pl-11"
                 id="signup-name"
               />
             </div>
+            {errors.name && <p className="text-[11px] mt-1" style={{ color: "#ef4444" }}>{errors.name}</p>}
           </div>
 
           <div>
@@ -93,11 +108,12 @@ export default function SignupPage() {
                 type="email"
                 placeholder="you@college.edu"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => { setEmail(e.target.value); setErrors((p) => ({ ...p, email: "" })); }}
                 className="glass-input pl-11"
                 id="signup-email"
               />
             </div>
+            {errors.email && <p className="text-[11px] mt-1" style={{ color: "#ef4444" }}>{errors.email}</p>}
           </div>
 
           <div>
@@ -114,11 +130,12 @@ export default function SignupPage() {
                 type="password"
                 placeholder="••••••••"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => { setPassword(e.target.value); setErrors((p) => ({ ...p, password: "" })); }}
                 className="glass-input pl-11"
                 id="signup-password"
               />
             </div>
+            {errors.password && <p className="text-[11px] mt-1" style={{ color: "#ef4444" }}>{errors.password}</p>}
           </div>
 
           {/* Interests */}

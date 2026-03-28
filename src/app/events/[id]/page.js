@@ -40,7 +40,7 @@ export default function EventDetailPage() {
     day: "numeric",
   });
 
-  const progress = Math.round((event.attendees / event.maxAttendees) * 100);
+  const progress = event.maxAttendees > 0 ? Math.round((event.attendees / event.maxAttendees) * 100) : 0;
 
   const mockAttendees = [
     { name: "Aarav S.", status: "Present", time: "9:02 AM" },

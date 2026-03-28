@@ -16,8 +16,9 @@ function getFirstDayOfMonth(year, month) {
 }
 
 export default function CalendarPage() {
-  const [year, setYear] = useState(2026);
-  const [month, setMonth] = useState(2); // March = 2 (0-indexed)
+  const now = new Date();
+  const [year, setYear] = useState(now.getFullYear());
+  const [month, setMonth] = useState(now.getMonth());
 
   const daysInMonth = getDaysInMonth(year, month);
   const firstDay = getFirstDayOfMonth(year, month);

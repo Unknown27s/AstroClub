@@ -1,6 +1,7 @@
 "use client";
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Trophy, Medal, Flame, Star, TrendingUp, Award } from "lucide-react";
+import { Trophy, Medal, Flame, Star, TrendingUp, Award, Search } from "lucide-react";
 
 const leaderboard = [
   { rank: 1, name: "Priya Menon", avatar: "PM", points: 980, events: 28, streak: 15, badge: "🏆" },
@@ -25,6 +26,12 @@ const badges = [
 ];
 
 export default function LeaderboardPage() {
+  const [search, setSearch] = useState("");
+
+  const filtered = leaderboard.filter((row) =>
+    row.name.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
     <div className="pt-24 pb-12">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -40,13 +47,26 @@ export default function LeaderboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Leaderboard Table */}
           <div className="lg:col-span-2">
-            <h2 className="text-base font-semibold mb-4 flex items-center gap-2" style={{ fontFamily: "Outfit, sans-serif", color: "var(--text-primary)" }}>
-              <TrendingUp size={18} style={{ color: "var(--accent-1)" }} /> Top Performers
-            </h2>
+            <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
+              <h2 className="text-base font-semibold flex items-center gap-2" style={{ fontFamily: "Outfit, sans-serif", color: "var(--text-primary)" }}>
+                <TrendingUp size={18} style={{ color: "var(--accent-1)" }} /> Top Performers
+              </h2>
+              <div className="relative">
+                <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "var(--text-secondary)" }} />
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="glass-input pl-8 py-1.5 text-xs"
+                  style={{ width: "160px" }}
+                />
+              </div>
+            </div>
 
-            <div className="glass-card overflow-hidden">
+            <div className="glass-card overflow-hidden overflow-x-auto">
               {/* Header Row */}
-              <div className="grid grid-cols-12 gap-2 px-5 py-3 border-b text-[11px] font-semibold" style={{ borderColor: "var(--border-color)", color: "var(--text-secondary)" }}>
+              <div className="min-w-[420px] grid grid-cols-12 gap-2 px-5 py-3 border-b text-[11px] font-semibold" style={{ borderColor: "var(--border-color)", color: "var(--text-secondary)" }}>
                 <div className="col-span-1">#</div>
                 <div className="col-span-5">Student</div>
                 <div className="col-span-2 text-center">Points</div>
@@ -55,47 +75,53 @@ export default function LeaderboardPage() {
               </div>
 
               {/* Rows */}
-              {leaderboard.map((row, i) => (
-                <motion.div
-                  key={row.rank}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.05 }}
-                  className="grid grid-cols-12 gap-2 px-5 py-3 items-center border-b transition-colors"
-                  style={{
-                    borderColor: "var(--border-color)",
-                    background: row.isYou ? "rgba(108, 99, 255, 0.08)" : "transparent",
-                  }}
-                >
-                  <div className="col-span-1">
-                    <span className="text-sm font-bold" style={{ color: row.rank <= 3 ? "var(--accent-1)" : "var(--text-secondary)" }}>
-                      {row.badge || row.rank}
-                    </span>
-                  </div>
-                  <div className="col-span-5 flex items-center gap-2">
-                    <div className="avatar text-[10px] w-7 h-7">{row.avatar}</div>
-                    <div>
-                      <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-                        {row.name}
+              {filtered.length === 0 ? (
+                <div className="px-5 py-8 text-center text-sm" style={{ color: "var(--text-secondary)" }}>
+                  No students found matching &ldquo;{search}&rdquo;
+                </div>
+              ) : (
+                filtered.map((row, i) => (
+                  <motion.div
+                    key={row.rank}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.05 }}
+                    className="min-w-[420px] grid grid-cols-12 gap-2 px-5 py-3 items-center border-b transition-colors"
+                    style={{
+                      borderColor: "var(--border-color)",
+                      background: row.isYou ? "rgba(108, 99, 255, 0.08)" : "transparent",
+                    }}
+                  >
+                    <div className="col-span-1">
+                      <span className="text-sm font-bold" style={{ color: row.rank <= 3 ? "var(--accent-1)" : "var(--text-secondary)" }}>
+                        {row.badge || row.rank}
                       </span>
-                      {row.isYou && (
-                        <span className="ml-2 text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: "var(--accent-1)", color: "white" }}>
-                          YOU
-                        </span>
-                      )}
                     </div>
-                  </div>
-                  <div className="col-span-2 text-center text-sm font-semibold" style={{ color: "var(--accent-1)" }}>
-                    {row.points}
-                  </div>
-                  <div className="col-span-2 text-center text-sm" style={{ color: "var(--text-secondary)" }}>
-                    {row.events}
-                  </div>
-                  <div className="col-span-2 text-center text-sm flex items-center justify-center gap-1" style={{ color: "var(--text-secondary)" }}>
-                    <Flame size={12} style={{ color: "#f59e0b" }} /> {row.streak}
-                  </div>
-                </motion.div>
-              ))}
+                    <div className="col-span-5 flex items-center gap-2">
+                      <div className="avatar text-[10px] w-7 h-7 flex-shrink-0" aria-label={row.name}>{row.avatar}</div>
+                      <div className="min-w-0">
+                        <span className="text-sm font-medium block truncate" style={{ color: "var(--text-primary)" }}>
+                          {row.name}
+                        </span>
+                        {row.isYou && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-full font-bold" style={{ background: "var(--accent-1)", color: "white" }}>
+                            YOU
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="col-span-2 text-center text-sm font-semibold" style={{ color: "var(--accent-1)" }}>
+                      {row.points}
+                    </div>
+                    <div className="col-span-2 text-center text-sm" style={{ color: "var(--text-secondary)" }}>
+                      {row.events}
+                    </div>
+                    <div className="col-span-2 text-center text-sm flex items-center justify-center gap-1" style={{ color: "var(--text-secondary)" }}>
+                      <Flame size={12} style={{ color: "#f59e0b" }} /> {row.streak}
+                    </div>
+                  </motion.div>
+                ))
+              )}
             </div>
           </div>
 
@@ -115,7 +141,7 @@ export default function LeaderboardPage() {
                   style={{ opacity: badge.earned ? 1 : 0.4 }}
                 >
                   <span className="text-2xl">{badge.icon}</span>
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>{badge.name}</p>
                     <p className="text-[11px]" style={{ color: "var(--text-secondary)" }}>{badge.desc}</p>
                   </div>

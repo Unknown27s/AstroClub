@@ -56,7 +56,7 @@ export default function ClubChatPage() {
   }
 
   return (
-    <div className="pt-20 pb-0 flex flex-col" style={{ height: "100vh" }}>
+    <div className="flex flex-col" style={{ height: "100vh", paddingTop: "80px" }}>
       {/* Chat Header */}
       <div className="glass-nav px-4 sm:px-6 py-3 flex items-center gap-3 border-b" style={{ borderColor: "var(--border-color)" }}>
         <Link href={`/clubs/${id}`} className="p-1 hover:opacity-70" style={{ color: "var(--text-secondary)" }}>
@@ -70,7 +70,7 @@ export default function ClubChatPage() {
         </div>
         <div>
           <h3 className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>{club.name}</h3>
-          <p className="text-[11px]" style={{ color: "var(--text-secondary)" }}>{club.memberCount} members • {club.members.length} online</p>
+          <p className="text-[11px]" style={{ color: "var(--text-secondary)" }}>{club.memberCount} members • {club.activeMembers ?? Math.floor(club.memberCount * 0.2)} online</p>
         </div>
       </div>
 

@@ -5,7 +5,7 @@ import { Shield, Users, Calendar, BarChart3, Settings, Plus, Search, Trash2, Edi
 import { clubs } from "@/data/clubs";
 import { events } from "@/data/events";
 
-const users = [
+const initialUsers = [
   { id: 1, name: "Harish Kumar", email: "harish@college.edu", role: "Admin", clubs: 4, status: "Active" },
   { id: 2, name: "Priya Menon", email: "priya@college.edu", role: "Club Head", clubs: 2, status: "Active" },
   { id: 3, name: "Aarav Sharma", email: "aarav@college.edu", role: "Student", clubs: 3, status: "Active" },
@@ -15,6 +15,9 @@ const users = [
 
 export default function AdminPage() {
   const [tab, setTab] = useState("overview");
+  const [clubSearch, setClubSearch] = useState("");
+  const [eventSearch, setEventSearch] = useState("");
+  const [userSearch, setUserSearch] = useState("");
 
   const tabs = [
     { id: "overview", label: "Overview", icon: BarChart3 },
@@ -29,6 +32,22 @@ export default function AdminPage() {
     { label: "Events This Month", value: events.length.toString(), change: "+5", icon: Calendar },
     { label: "Avg. Attendance", value: "76%", change: "+8%", icon: BarChart3 },
   ];
+
+  const filteredClubs = clubs.filter(
+    (c) =>
+      c.name.toLowerCase().includes(clubSearch.toLowerCase()) ||
+      c.category.toLowerCase().includes(clubSearch.toLowerCase())
+  );
+  const filteredEvents = events.filter(
+    (e) =>
+      e.title.toLowerCase().includes(eventSearch.toLowerCase()) ||
+      e.clubName.toLowerCase().includes(eventSearch.toLowerCase())
+  );
+  const filteredUsers = initialUsers.filter(
+    (u) =>
+      u.name.toLowerCase().includes(userSearch.toLowerCase()) ||
+      u.email.toLowerCase().includes(userSearch.toLowerCase())
+  );
 
   return (
     <div className="pt-24 pb-12">
@@ -63,7 +82,7 @@ export default function AdminPage() {
         {/* Overview Tab */}
         {tab === "overview" && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
               {stats.map((s, i) => (
                 <motion.div key={s.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }} className="glass-card p-5">
                   <div className="flex items-center justify-between mb-3">
@@ -93,7 +112,7 @@ export default function AdminPage() {
                   <div key={i} className="flex items-center gap-3 py-2 border-b" style={{ borderColor: "var(--border-color)" }}>
                     <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: a.color }} />
                     <p className="text-sm flex-1" style={{ color: "var(--text-primary)" }}>{a.text}</p>
-                    <span className="text-[11px]" style={{ color: "var(--text-secondary)" }}>{a.time}</span>
+                    <span className="text-[11px] flex-shrink-0" style={{ color: "var(--text-secondary)" }}>{a.time}</span>
                   </div>
                 ))}
               </div>
@@ -104,12 +123,21 @@ export default function AdminPage() {
         {/* Clubs Tab */}
         {tab === "clubs" && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-sm" style={{ color: "var(--text-secondary)" }}>{clubs.length} clubs</p>
-              <button className="btn-primary text-xs py-2 px-4"><Plus size={14} /> Add Club</button>
+            <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
+              <div className="relative flex-1 max-w-xs">
+                <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "var(--text-secondary)" }} />
+                <input
+                  type="text"
+                  placeholder="Search clubs..."
+                  value={clubSearch}
+                  onChange={(e) => setClubSearch(e.target.value)}
+                  className="glass-input pl-8 py-2 text-xs"
+                />
+              </div>
+              <button className="btn-primary text-xs py-2 px-4 flex items-center gap-1"><Plus size={14} /> Add Club</button>
             </div>
-            <div className="glass-card overflow-hidden">
-              <div className="grid grid-cols-12 gap-2 px-5 py-3 border-b text-[11px] font-semibold" style={{ borderColor: "var(--border-color)", color: "var(--text-secondary)" }}>
+            <div className="glass-card overflow-hidden overflow-x-auto">
+              <div className="min-w-[560px] grid grid-cols-12 gap-2 px-5 py-3 border-b text-[11px] font-semibold" style={{ borderColor: "var(--border-color)", color: "var(--text-secondary)" }}>
                 <div className="col-span-1">Icon</div>
                 <div className="col-span-3">Name</div>
                 <div className="col-span-2">Category</div>
@@ -117,22 +145,26 @@ export default function AdminPage() {
                 <div className="col-span-2 text-center">Events</div>
                 <div className="col-span-2 text-center">Actions</div>
               </div>
-              {clubs.map((club) => (
-                <div key={club.id} className="grid grid-cols-12 gap-2 px-5 py-3 items-center border-b" style={{ borderColor: "var(--border-color)" }}>
-                  <div className="col-span-1 text-lg">{club.image}</div>
-                  <div className="col-span-3 text-sm font-medium" style={{ color: "var(--text-primary)" }}>{club.name}</div>
-                  <div className="col-span-2"><span className="badge text-[10px]">{club.category}</span></div>
-                  <div className="col-span-2 text-center text-sm" style={{ color: "var(--text-secondary)" }}>{club.memberCount}</div>
-                  <div className="col-span-2 text-center text-sm" style={{ color: "var(--text-secondary)" }}>
-                    {events.filter(e => e.clubId === club.id).length}
+              {filteredClubs.length === 0 ? (
+                <div className="px-5 py-8 text-center text-sm" style={{ color: "var(--text-secondary)" }}>No clubs found.</div>
+              ) : (
+                filteredClubs.map((club) => (
+                  <div key={club.id} className="min-w-[560px] grid grid-cols-12 gap-2 px-5 py-3 items-center border-b" style={{ borderColor: "var(--border-color)" }}>
+                    <div className="col-span-1 text-lg">{club.image}</div>
+                    <div className="col-span-3 text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>{club.name}</div>
+                    <div className="col-span-2"><span className="badge text-[10px]">{club.category}</span></div>
+                    <div className="col-span-2 text-center text-sm" style={{ color: "var(--text-secondary)" }}>{club.memberCount}</div>
+                    <div className="col-span-2 text-center text-sm" style={{ color: "var(--text-secondary)" }}>
+                      {events.filter(e => e.clubId === club.id).length}
+                    </div>
+                    <div className="col-span-2 flex items-center justify-center gap-2">
+                      <button className="p-1.5 rounded-lg cursor-pointer hover:opacity-70" style={{ color: "var(--accent-1)" }} aria-label="View"><Eye size={14} /></button>
+                      <button className="p-1.5 rounded-lg cursor-pointer hover:opacity-70" style={{ color: "var(--text-secondary)" }} aria-label="Edit"><Edit size={14} /></button>
+                      <button className="p-1.5 rounded-lg cursor-pointer hover:opacity-70" style={{ color: "#ef4444" }} aria-label="Delete"><Trash2 size={14} /></button>
+                    </div>
                   </div>
-                  <div className="col-span-2 flex items-center justify-center gap-2">
-                    <button className="p-1.5 rounded-lg cursor-pointer hover:opacity-70" style={{ color: "var(--accent-1)" }}><Eye size={14} /></button>
-                    <button className="p-1.5 rounded-lg cursor-pointer hover:opacity-70" style={{ color: "var(--text-secondary)" }}><Edit size={14} /></button>
-                    <button className="p-1.5 rounded-lg cursor-pointer hover:opacity-70" style={{ color: "#ef4444" }}><Trash2 size={14} /></button>
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </motion.div>
         )}
@@ -140,37 +172,50 @@ export default function AdminPage() {
         {/* Events Tab */}
         {tab === "events" && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-sm" style={{ color: "var(--text-secondary)" }}>{events.length} events</p>
-              <button className="btn-primary text-xs py-2 px-4"><Plus size={14} /> Create Event</button>
+            <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
+              <div className="relative flex-1 max-w-xs">
+                <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "var(--text-secondary)" }} />
+                <input
+                  type="text"
+                  placeholder="Search events..."
+                  value={eventSearch}
+                  onChange={(e) => setEventSearch(e.target.value)}
+                  className="glass-input pl-8 py-2 text-xs"
+                />
+              </div>
+              <button className="btn-primary text-xs py-2 px-4 flex items-center gap-1"><Plus size={14} /> Create Event</button>
             </div>
-            <div className="glass-card overflow-hidden">
-              <div className="grid grid-cols-12 gap-2 px-5 py-3 border-b text-[11px] font-semibold" style={{ borderColor: "var(--border-color)", color: "var(--text-secondary)" }}>
+            <div className="glass-card overflow-hidden overflow-x-auto">
+              <div className="min-w-[520px] grid grid-cols-12 gap-2 px-5 py-3 border-b text-[11px] font-semibold" style={{ borderColor: "var(--border-color)", color: "var(--text-secondary)" }}>
                 <div className="col-span-4">Event</div>
                 <div className="col-span-2">Club</div>
                 <div className="col-span-2">Date</div>
                 <div className="col-span-2 text-center">RSVPs</div>
                 <div className="col-span-2 text-center">Actions</div>
               </div>
-              {events.map((ev) => (
-                <div key={ev.id} className="grid grid-cols-12 gap-2 px-5 py-3 items-center border-b" style={{ borderColor: "var(--border-color)" }}>
-                  <div className="col-span-4 text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>
-                    {ev.image} {ev.title}
+              {filteredEvents.length === 0 ? (
+                <div className="px-5 py-8 text-center text-sm" style={{ color: "var(--text-secondary)" }}>No events found.</div>
+              ) : (
+                filteredEvents.map((ev) => (
+                  <div key={ev.id} className="min-w-[520px] grid grid-cols-12 gap-2 px-5 py-3 items-center border-b" style={{ borderColor: "var(--border-color)" }}>
+                    <div className="col-span-4 text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>
+                      {ev.image} {ev.title}
+                    </div>
+                    <div className="col-span-2 text-xs truncate" style={{ color: "var(--accent-1)" }}>{ev.clubName}</div>
+                    <div className="col-span-2 text-xs" style={{ color: "var(--text-secondary)" }}>
+                      {new Date(ev.date).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
+                    </div>
+                    <div className="col-span-2 text-center text-sm" style={{ color: "var(--text-secondary)" }}>
+                      {ev.attendees}/{ev.maxAttendees}
+                    </div>
+                    <div className="col-span-2 flex items-center justify-center gap-2">
+                      <button className="p-1.5 rounded-lg cursor-pointer hover:opacity-70" style={{ color: "var(--accent-1)" }} aria-label="View"><Eye size={14} /></button>
+                      <button className="p-1.5 rounded-lg cursor-pointer hover:opacity-70" style={{ color: "var(--text-secondary)" }} aria-label="Edit"><Edit size={14} /></button>
+                      <button className="p-1.5 rounded-lg cursor-pointer hover:opacity-70" style={{ color: "#ef4444" }} aria-label="Delete"><Trash2 size={14} /></button>
+                    </div>
                   </div>
-                  <div className="col-span-2 text-xs" style={{ color: "var(--accent-1)" }}>{ev.clubName}</div>
-                  <div className="col-span-2 text-xs" style={{ color: "var(--text-secondary)" }}>
-                    {new Date(ev.date).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
-                  </div>
-                  <div className="col-span-2 text-center text-sm" style={{ color: "var(--text-secondary)" }}>
-                    {ev.attendees}/{ev.maxAttendees}
-                  </div>
-                  <div className="col-span-2 flex items-center justify-center gap-2">
-                    <button className="p-1.5 rounded-lg cursor-pointer hover:opacity-70" style={{ color: "var(--accent-1)" }}><Eye size={14} /></button>
-                    <button className="p-1.5 rounded-lg cursor-pointer hover:opacity-70" style={{ color: "var(--text-secondary)" }}><Edit size={14} /></button>
-                    <button className="p-1.5 rounded-lg cursor-pointer hover:opacity-70" style={{ color: "#ef4444" }}><Trash2 size={14} /></button>
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </motion.div>
         )}
@@ -178,15 +223,15 @@ export default function AdminPage() {
         {/* Users Tab */}
         {tab === "users" && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="relative max-w-xs flex-1">
+            <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
+              <div className="relative flex-1 max-w-xs">
                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "var(--text-secondary)" }} />
-                <input type="text" placeholder="Search users..." className="glass-input pl-9 py-2 text-xs" />
+                <input type="text" placeholder="Search users..." value={userSearch} onChange={(e) => setUserSearch(e.target.value)} className="glass-input pl-9 py-2 text-xs" />
               </div>
-              <button className="btn-primary text-xs py-2 px-4"><Plus size={14} /> Add User</button>
+              <button className="btn-primary text-xs py-2 px-4 flex items-center gap-1"><Plus size={14} /> Add User</button>
             </div>
-            <div className="glass-card overflow-hidden">
-              <div className="grid grid-cols-12 gap-2 px-5 py-3 border-b text-[11px] font-semibold" style={{ borderColor: "var(--border-color)", color: "var(--text-secondary)" }}>
+            <div className="glass-card overflow-hidden overflow-x-auto">
+              <div className="min-w-[560px] grid grid-cols-12 gap-2 px-5 py-3 border-b text-[11px] font-semibold" style={{ borderColor: "var(--border-color)", color: "var(--text-secondary)" }}>
                 <div className="col-span-3">Name</div>
                 <div className="col-span-3">Email</div>
                 <div className="col-span-2">Role</div>
@@ -194,34 +239,38 @@ export default function AdminPage() {
                 <div className="col-span-1 text-center">Status</div>
                 <div className="col-span-2 text-center">Actions</div>
               </div>
-              {users.map((u) => (
-                <div key={u.id} className="grid grid-cols-12 gap-2 px-5 py-3 items-center border-b" style={{ borderColor: "var(--border-color)" }}>
-                  <div className="col-span-3 flex items-center gap-2">
-                    <div className="avatar text-[10px] w-7 h-7">{u.name.split(" ").map(n => n[0]).join("")}</div>
-                    <span className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{u.name}</span>
+              {filteredUsers.length === 0 ? (
+                <div className="px-5 py-8 text-center text-sm" style={{ color: "var(--text-secondary)" }}>No users found.</div>
+              ) : (
+                filteredUsers.map((u) => (
+                  <div key={u.id} className="min-w-[560px] grid grid-cols-12 gap-2 px-5 py-3 items-center border-b" style={{ borderColor: "var(--border-color)" }}>
+                    <div className="col-span-3 flex items-center gap-2">
+                      <div className="avatar text-[10px] w-7 h-7 flex-shrink-0" aria-label={u.name}>{u.name.split(" ").map(n => n[0]).join("")}</div>
+                      <span className="text-sm font-medium truncate" style={{ color: "var(--text-primary)" }}>{u.name}</span>
+                    </div>
+                    <div className="col-span-3 text-xs truncate" style={{ color: "var(--text-secondary)" }}>{u.email}</div>
+                    <div className="col-span-2">
+                      <span className="badge text-[10px]" style={{
+                        background: u.role === "Admin" ? "rgba(239,68,68,0.15)" : u.role === "Club Head" ? "rgba(245,158,11,0.15)" : "rgba(108,99,255,0.15)",
+                        color: u.role === "Admin" ? "#ef4444" : u.role === "Club Head" ? "#f59e0b" : "var(--accent-1)",
+                        borderColor: u.role === "Admin" ? "rgba(239,68,68,0.2)" : u.role === "Club Head" ? "rgba(245,158,11,0.2)" : "rgba(108,99,255,0.2)",
+                      }}>
+                        {u.role}
+                      </span>
+                    </div>
+                    <div className="col-span-1 text-center text-sm" style={{ color: "var(--text-secondary)" }}>{u.clubs}</div>
+                    <div className="col-span-1 text-center">
+                      <span className="text-[10px] font-semibold" style={{ color: u.status === "Active" ? "#22c55e" : "#ef4444" }}>
+                        {u.status}
+                      </span>
+                    </div>
+                    <div className="col-span-2 flex items-center justify-center gap-2">
+                      <button className="p-1.5 rounded-lg cursor-pointer hover:opacity-70" style={{ color: "var(--text-secondary)" }} aria-label="Edit"><Edit size={14} /></button>
+                      <button className="p-1.5 rounded-lg cursor-pointer hover:opacity-70" style={{ color: "#ef4444" }} aria-label="Delete"><Trash2 size={14} /></button>
+                    </div>
                   </div>
-                  <div className="col-span-3 text-xs" style={{ color: "var(--text-secondary)" }}>{u.email}</div>
-                  <div className="col-span-2">
-                    <span className="badge text-[10px]" style={{
-                      background: u.role === "Admin" ? "rgba(239,68,68,0.15)" : u.role === "Club Head" ? "rgba(245,158,11,0.15)" : "rgba(108,99,255,0.15)",
-                      color: u.role === "Admin" ? "#ef4444" : u.role === "Club Head" ? "#f59e0b" : "var(--accent-1)",
-                      borderColor: u.role === "Admin" ? "rgba(239,68,68,0.2)" : u.role === "Club Head" ? "rgba(245,158,11,0.2)" : "rgba(108,99,255,0.2)",
-                    }}>
-                      {u.role}
-                    </span>
-                  </div>
-                  <div className="col-span-1 text-center text-sm" style={{ color: "var(--text-secondary)" }}>{u.clubs}</div>
-                  <div className="col-span-1 text-center">
-                    <span className="text-[10px] font-semibold" style={{ color: u.status === "Active" ? "#22c55e" : "#ef4444" }}>
-                      {u.status}
-                    </span>
-                  </div>
-                  <div className="col-span-2 flex items-center justify-center gap-2">
-                    <button className="p-1.5 rounded-lg cursor-pointer hover:opacity-70" style={{ color: "var(--text-secondary)" }}><Edit size={14} /></button>
-                    <button className="p-1.5 rounded-lg cursor-pointer hover:opacity-70" style={{ color: "#ef4444" }}><Trash2 size={14} /></button>
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </motion.div>
         )}

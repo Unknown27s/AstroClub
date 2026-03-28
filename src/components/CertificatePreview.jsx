@@ -1,10 +1,21 @@
 "use client";
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Award, Download } from "lucide-react";
 
 export default function CertificatePreview({ event, userName = "Harish Kumar", onClose }) {
+  useEffect(() => {
+    const handleKey = (e) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [onClose]);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-4" style={{ background: "rgba(0,0,0,0.6)" }}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center px-4"
+      style={{ background: "rgba(0,0,0,0.6)" }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -59,17 +70,17 @@ export default function CertificatePreview({ event, userName = "Harish Kumar", o
             Organized by {event?.clubName} • {new Date(event?.date).toLocaleDateString("en-IN", { year: "numeric", month: "long", day: "numeric" })}
           </p>
 
-          <div className="flex items-center justify-center gap-8 mt-8 pt-6 border-t" style={{ borderColor: "rgba(255,255,255,0.1)" }}>
+          <div className="grid grid-cols-3 gap-4 mt-8 pt-6 border-t" style={{ borderColor: "rgba(255,255,255,0.1)" }}>
             <div className="text-center">
-              <div className="w-24 border-b mb-1" style={{ borderColor: "var(--text-secondary)" }} />
+              <div className="w-full border-b mb-2" style={{ borderColor: "var(--text-secondary)" }} />
               <p className="text-[10px]" style={{ color: "var(--text-secondary)" }}>Club Head</p>
             </div>
-            <div className="text-center">
+            <div className="text-center flex flex-col items-center justify-center">
               <p className="text-sm font-bold" style={{ color: "var(--accent-1)" }}>🚀 AstroClub</p>
               <p className="text-[10px]" style={{ color: "var(--text-secondary)" }}>Powered by</p>
             </div>
             <div className="text-center">
-              <div className="w-24 border-b mb-1" style={{ borderColor: "var(--text-secondary)" }} />
+              <div className="w-full border-b mb-2" style={{ borderColor: "var(--text-secondary)" }} />
               <p className="text-[10px]" style={{ color: "var(--text-secondary)" }}>Faculty Advisor</p>
             </div>
           </div>
